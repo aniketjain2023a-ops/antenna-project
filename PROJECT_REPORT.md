@@ -118,7 +118,8 @@ Layered Python application (see README §3):
 
 | Layer | Modules | Responsibility |
 |---|---|---|
-| Presentation | `app.py`, `ui/*` | Streamlit multipage UI (9 pages); no business logic |
+| Presentation | `frontend/` (React, TypeScript, Tailwind, shadcn/ui, Recharts) | three-page website; no business logic |
+| API | `backend/` (FastAPI) | REST endpoints over the services layer |
 | Services | `services/workflow.py` | orchestration shared by UI, demo script and tests |
 | Domain | `ml/*`, `optimization/*`, `datasets/*`, `reporting/*`, `visualization/*` | algorithms |
 | Data access | `database/repository.py` | transactions, CRUD, duplicate checks |

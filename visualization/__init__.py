@@ -1,1 +1,1 @@
-"""Plotly (interactive) and Matplotlib (static report) figures."""
+"""Matplotlib figures for the PDF report and the results/ folder (the website draws its own charts)."""

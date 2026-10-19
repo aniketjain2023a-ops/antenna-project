@@ -13,7 +13,7 @@ Seven objectives (data + provenance, leakage-safe ML, prediction + uncertainty, 
 Contribution = integration and evaluation. We do not claim to have invented ML-based antenna optimization.
 
 **Slide 4 - Architecture**
-Layered diagram: Streamlit UI → services → ML / optimization / reporting → repository → SQLite.
+Layered diagram: React website → FastAPI → services → ML / optimization → repository → SQLite.
 List the 7 tables and the provenance types.
 
 **Slide 5 - Data and honesty**

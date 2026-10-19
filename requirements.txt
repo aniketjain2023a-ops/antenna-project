@@ -1,15 +1,18 @@
-# MetaOpt-AI - tested with Python 3.11.17 and 3.13.16 (50/50 tests pass on both).
+# MetaOpt-AI backend (FastAPI) + ML pipeline. The website lives in frontend/ (npm install there).
 # Lower bounds are the minimum versions the code relies on; tested versions in comments.
-streamlit>=1.56,<2          # tested 1.66.0 (top navigation, st.badge, theme tokens incl. metricValueFontSize)
+# Streamlit is no longer used.
 numpy>=1.26                 # tested 2.5.3
 pandas>=2.1                 # tested 3.0.5
 scikit-learn>=1.4           # tested 1.9.1
 scipy>=1.11                 # tested 1.18.1
 matplotlib>=3.8             # tested 3.11.2
-plotly>=5.20                # tested 7.1.0
+fastapi>=0.115              # REST API for the React website; tested 0.149.0
+uvicorn>=0.30               # ASGI server; tested 0.53.0
+httpx>=0.27                 # FastAPI TestClient (API tests); tested 0.28.1
 SQLAlchemy>=2.0,<3          # tested 2.1.5
 joblib>=1.3                 # tested 1.6.0
 reportlab>=4.0              # tested 5.0.1
-openpyxl>=3.1               # Excel (.xlsx) upload; tested 3.1.5
+openpyxl>=3.1               # reads the METU-SIMPL .xlsx files; tested 3.1.5
 pytest>=8.0                 # tested 9.1.1
 pypdf>=4.0                  # used only by tests to read the generated PDF; tested 6.17.0
+# Optional, only for the browser end-to-end test (tests/e2e): pip install playwright && playwright install chromium

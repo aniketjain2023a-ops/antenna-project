@@ -20,3 +20,6 @@ data/raw/*/*
 data/processed/*/*
 !data/processed/*/preprocessing_summary.json
 results/*/test_predictions.csv
+# React website build outputs
+frontend/node_modules/
+frontend/dist/

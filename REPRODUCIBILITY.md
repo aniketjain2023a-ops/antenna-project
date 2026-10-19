@@ -8,7 +8,7 @@ pip install -r requirements.txt
 python -c "import sklearn, scipy, numpy; print(sklearn.__version__, scipy.__version__, numpy.__version__)"
 ```
 The recorded results used Python 3.13.16, scikit-learn 1.9.1, SciPy 1.18.1, NumPy 2.5.3,
-pandas 3.0.5 and Streamlit 1.66.0. Other versions should give the same *workflow*, but
+pandas 3.0.5, FastAPI 0.149.0; website: React 19.3, Vite 8.3, Recharts 3.10. Other versions should give the same *workflow*, but
 floating-point results (and tree-ensemble or GP fits) may differ slightly between library
 versions and CPU architectures (Apple Silicon vs x86).
 

@@ -89,8 +89,9 @@ results. All results come from this software running on synthetic data.
     Python," *Nature Methods*, vol. 17, pp. 261-272, 2020. doi:10.1038/s41592-019-0686-2
 22. C. R. Harris et al., "Array programming with NumPy," *Nature*, vol. 585, pp. 357-362,
     2020. doi:10.1038/s41586-020-2649-2
-23. Software documentation (cite as web resources with access date): Streamlit
-    (https://docs.streamlit.io), SQLAlchemy (https://docs.sqlalchemy.org), SQLite
+23. Software documentation (cite as web resources with access date): React (https://react.dev),
+    Vite (https://vite.dev), FastAPI (https://fastapi.tiangolo.com), Tailwind CSS (https://tailwindcss.com),
+    shadcn/ui (https://ui.shadcn.com), Recharts (https://recharts.org), SQLAlchemy (https://docs.sqlalchemy.org), SQLite
     (https://sqlite.org), ReportLab (https://docs.reportlab.com), Plotly (https://plotly.com/python/).
 
 ---
