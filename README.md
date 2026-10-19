@@ -31,8 +31,8 @@ streamlit run app.py              # opens http://localhost:8501
 
 On first start the app creates `data/metaopt_ai.db`, generates
 `data/synthetic_demo.csv` if missing, and registers it as a SYNTHETIC dataset.
-On the **Overview** page, click **Quick start: train demo models** (about 30 s).
-Every other page then works.
+On **Dataset & Model**, press **Train models** (about 30 s with the default set).
+Prediction, optimization and the results pages then have models to use.
 
 Optional headless run of the whole workflow (training with tuning, three
 objectives × three optimizers, PDF + CSV export):
@@ -45,28 +45,35 @@ python scripts/run_demo_pipeline.py --quick  # under 1 min
 Tests:
 
 ```bash
-python -m pytest            # 50 tests, about 75 s
+python -m pytest            # 51 tests, about 80 s
 ```
 
-## 2. Pages
+## 2. Sections
 
-| # | Page | What it does |
-|---|---|---|
-| A | Overview Dashboard | purpose, counts, active-model metrics, workflow diagram, recent activity, quick-start training |
-| B | Dataset Management | inspect active data (stats, quality, IQR outliers, distributions, correlation); upload CSV/Excel → type detection → column mapping → cleaning summary → provenance → register; export |
-| C | ML Model Lab | choose features/targets/models/split/seed/CV folds; optional RandomizedSearchCV with editable search spaces; comparison table and charts; actual-vs-predicted & residual plots; active model selection |
-| D | Performance Prediction | geometry inputs → S11 & gain with approximate uncertainty, extrapolation warnings, model metrics; save to DB |
-| E | Optimization Lab | objective (max gain s.t. S11 ≤ limit / min S11 s.t. gain ≥ limit / normalized trade-off), bounds, baseline, kappa risk-aversion, 3 algorithms, ranking with explanations, convergence, Pareto trade-off, design-space map, synthetic oracle check |
-| F | Explainable AI | impurity & permutation importance, OAT sensitivity with uncertainty band, local sensitivities, partial dependence, uncertainty map + suggested sampling regions, empirical interval coverage |
-| G | Experiment History | searchable/filterable tables of datasets, experiments, predictions, optimization runs; CSV export |
-| H | Report Generator | PDF report (provenance, methods, metrics, figures, optimization, limitations, reproducibility) + CSV ZIP |
-| I | Project Info & Limitations | problem, methodology, assumptions, limitations, contribution |
+The interface has three sections, shown in the top navigation bar.
+
+| Section | What it does |
+|---|---|
+| **Dataset & Model** | Active dataset with provenance badge; data quality (missing values, duplicates, IQR outliers), preview, statistics and distributions; CSV/Excel import with column mapping, cleaning summary and mandatory provenance; model training (models, features, targets, split, CV folds, optional tuning under *Advanced*) with live progress; model comparison table (R², MAE, RMSE, CV R²) and actual-vs-predicted plots; active model per target |
+| **Predict & Optimize** | Antenna parameters with units, valid ranges and inline validation → predicted S11 and gain with approximate uncertainty, model metrics and provenance; save to history. Separately: Differential Evolution optimization (objective, constraint, bounds, baseline, budget, seed; other algorithms and risk aversion under *Advanced*) → baseline vs ML-selected candidate side by side with changes; search diagnostics |
+| **Results & History** | Tabs: model performance (comparison chart, table, actual-vs-predicted and residuals); explainability (permutation and impurity importance, parameter sensitivity, partial dependence and uncertainty map); optimization history (baseline vs candidate per run); data & export (provenance, CSV downloads, ZIP, PDF report, searchable SQLite records, limitations) |
+
+### Design system
+
+The interface follows the Apple Design skill's guidance, translated to Streamlit:
+system font with size-specific tracking and leading; one restrained blue accent;
+amber, green and red reserved for warnings, success and errors; white cards on a warm
+off-white canvas; a translucent navigation bar; instant press feedback; and
+reduced-motion, reduced-transparency and high-contrast fallbacks. Tokens live in
+`.streamlit/config.toml` (native theme) and `ui/theme.py` (a small CSS layer and
+reusable components such as cards, badges, the context bar and empty states).
+Charts share one Plotly template defined in `visualization/plots.py`.
 
 ## 3. Architecture
 
 ```
 antenna-project/  (MetaOpt-AI)
-├── app.py                     Streamlit entry point (st.navigation, 9 pages)
+├── app.py                     Streamlit entry point (top navigation, 3 sections)
 ├── config.py                  paths, seeds, provenance vocabulary, defaults
 ├── database/                  SQLAlchemy models, engine/session, migrations, repository (DAL)
 ├── datasets/                  synthetic generator (documented formula) + CSV/Excel reader
@@ -76,7 +83,7 @@ antenna-project/  (MetaOpt-AI)
 ├── services/workflow.py       orchestration used by UI, scripts and tests (single source of logic)
 ├── visualization/             Plotly (dashboard) and Matplotlib (PDF) figures
 ├── reporting/                 ReportLab PDF + CSV export
-├── ui/                        one module per dashboard page (UI only)
+├── ui/                        theme.py (design system), one module per section (UI only)
 ├── utils/                     validation, logging, SciPy compatibility
 ├── scripts/run_demo_pipeline.py
 ├── tests/                     pytest suite (database, data, ML, optimization, reporting)

@@ -12,6 +12,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+import plotly.io as pio
 from plotly.subplots import make_subplots
 
 from config import label_of
@@ -23,9 +24,30 @@ SEQUENTIAL_UNC = "Oranges"
 DIVERGING = "RdBu"
 
 
+FONT_STACK = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+INK, INK_2, GRID, AXIS = "#1C1C1E", "#6B6B70", "#ECECE8", "#D3D3CE"
+
+# One template for every interactive chart: system font, quiet grid, transparent background
+# (charts sit on white cards), compact margins, legend below the plot.
+pio.templates["metaopt"] = go.layout.Template(layout=dict(
+    font=dict(family=FONT_STACK, size=13, color=INK),
+    title=dict(font=dict(family=FONT_STACK, size=15, color=INK), x=0.0, xanchor="left", y=0.97),
+    colorway=SERIES,
+    paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+    xaxis=dict(gridcolor=GRID, zerolinecolor=AXIS, linecolor=AXIS, ticks="outside", tickcolor=AXIS,
+               title=dict(font=dict(size=12.5, color=INK_2)), automargin=True),
+    yaxis=dict(gridcolor=GRID, zerolinecolor=AXIS, linecolor=AXIS, ticks="outside", tickcolor=AXIS,
+               title=dict(font=dict(size=12.5, color=INK_2)), automargin=True),
+    legend=dict(orientation="h", yanchor="top", y=-0.18, x=0.0, font=dict(size=12, color=INK_2)),
+    hoverlabel=dict(bgcolor="white", bordercolor=AXIS, font=dict(family=FONT_STACK, size=12, color=INK)),
+    coloraxis=dict(colorbar=dict(outlinewidth=0, thickness=12)),
+))
+
+
 def _layout(fig: go.Figure, title: str, height: int = 420) -> go.Figure:
-    fig.update_layout(title=dict(text=title, x=0.0, xanchor="left"), height=height,
-                      margin=dict(l=60, r=20, t=60, b=50), legend=dict(orientation="h", y=-0.2))
+    fig.update_layout(template="metaopt", title=dict(text=title), height=height,
+                      margin=dict(l=56, r=16, t=56, b=48),
+                      paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
     return fig
 
 
@@ -85,8 +107,7 @@ def actual_vs_predicted(y_true, y_pred, target: str, title_suffix: str = "", y_s
                              line=dict(color=MUTED, width=2, dash="dash")))
     fig.update_xaxes(title=f"Actual {label_of(target)}")
     fig.update_yaxes(title=f"Predicted {label_of(target)}")
-    note = " (error bars: +/-1.96 sigma, approximate)" if y_std is not None else ""
-    return _layout(fig, f"Actual vs predicted {target} - held-out test set{title_suffix}{note}")
+    return _layout(fig, f"Actual vs predicted · {target} (test set){title_suffix}")
 
 
 def residual_plot(y_true, y_pred, target: str, title_suffix: str = "") -> go.Figure:
@@ -100,7 +121,7 @@ def residual_plot(y_true, y_pred, target: str, title_suffix: str = "") -> go.Fig
     unit = label_of(target).split("[")[-1].rstrip("]") if "[" in label_of(target) else ""
     fig.update_xaxes(title=f"Predicted {label_of(target)}")
     fig.update_yaxes(title=f"Residual (actual - predicted) [{unit}]" if unit else "Residual")
-    return _layout(fig, f"Residuals for {target}{title_suffix}")
+    return _layout(fig, f"Residuals · {target} (test set){title_suffix}")
 
 
 def metric_comparison(table: pd.DataFrame, metric: str = "test_R2") -> go.Figure | None:
@@ -109,7 +130,7 @@ def metric_comparison(table: pd.DataFrame, metric: str = "test_R2") -> go.Figure
     t = table.dropna(subset=[metric]).copy()
     if t.empty:
         return None
-    t["label"] = t["model"] + " (" + t["variant"] + ")"
+    t["label"] = t["Model" if "Model" in t else "model"] + " (" + t["variant"] + ")"
     targets = list(dict.fromkeys(t["target"]))
     fig = go.Figure()
     for i, target in enumerate(targets[:8]):
@@ -117,9 +138,10 @@ def metric_comparison(table: pd.DataFrame, metric: str = "test_R2") -> go.Figure
         fig.add_trace(go.Bar(x=sub["label"], y=sub[metric], name=target, marker_color=SERIES[i],
                              hovertemplate="%{x}<br>" + metric + "=%{y:.3f}<extra>" + target + "</extra>"))
     fig.update_layout(barmode="group", bargap=0.25, bargroupgap=0.05)
-    fig.update_yaxes(title=metric.replace("_", " ") + (" [target unit]" if "R2" not in metric else " [-]"))
+    fig.update_yaxes(title=metric.replace("_", " ").replace("R2", "R²") + (" (dB for S11, dBi for gain)" if "R2" not in metric else " [-]"))
     fig.update_xaxes(title="model (variant)")
-    return _layout(fig, f"Model comparison: {metric.replace('_', ' ')} per target")
+    pretty = {"test_R2": "test R²", "cv_R2_mean": "cross-validated R²", "test_RMSE": "test RMSE", "test_MAE": "test MAE"}
+    return _layout(fig, f"Model comparison · {pretty.get(metric, metric)} per target")
 
 
 def importance_bar(df: pd.DataFrame | None, value_col: str, title: str, err_col: str | None = None) -> go.Figure | None:
@@ -152,7 +174,7 @@ def sensitivity_lines(frames: dict[str, pd.DataFrame], feature: str, target: str
         fig.add_vline(x=base_value, line=dict(color=MUTED, dash="dot"), annotation_text="base point")
     fig.update_xaxes(title=label_of(feature))
     fig.update_yaxes(title=f"Predicted {label_of(target)}")
-    return _layout(fig, f"One-at-a-time sensitivity of {target} to {feature}")
+    return _layout(fig, f"Sensitivity of {target} to {feature}")
 
 
 def partial_dependence_line(df: pd.DataFrame, feature: str, target: str) -> go.Figure:
@@ -197,7 +219,7 @@ def baseline_vs_candidates(rows: pd.DataFrame, target: str) -> go.Figure | None:
                            hovertemplate="%{x}<br>%{y:.3f}<extra></extra>"))
     fig.update_yaxes(title=f"Predicted {label_of(target)}")
     fig.update_xaxes(title="design")
-    return _layout(fig, f"Baseline vs ML-selected candidates: predicted {target}", height=360)
+    return _layout(fig, f"Baseline vs candidate · predicted {target}", height=360)
 
 
 def tradeoff_scatter(samples: pd.DataFrame, x_target: str, y_target: str,

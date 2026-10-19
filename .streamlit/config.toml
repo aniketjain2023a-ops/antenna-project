@@ -1,6 +1,58 @@
+# MetaOpt-AI design tokens (native Streamlit theme).
+# The same values are mirrored in ui/theme.py (TOKENS) for the few places that
+# need them in CSS or Plotly. Change a colour here AND there.
+
 [theme]
-primaryColor = "#2a78d6"
 base = "light"
+
+# Surfaces: warm off-white canvas, white cards (cards are styled in ui/theme.py)
+backgroundColor = "#F5F5F3"
+secondaryBackgroundColor = "#ECECE9"
+textColor = "#1C1C1E"
+borderColor = "#DCDCD8"
+dataframeBorderColor = "#E6E6E2"
+dataframeHeaderBackgroundColor = "#F7F7F5"
+showWidgetBorder = true
+linkColor = "#0A64D6"
+
+# One restrained accent for primary actions
+primaryColor = "#0A64D6"
+
+# Semantic status colours (success / warning / error / info)
+greenColor = "#1A7F37"
+greenTextColor = "#1A6B30"
+greenBackgroundColor = "#EAF5EC"
+orangeColor = "#B86E00"
+orangeTextColor = "#8A5300"
+orangeBackgroundColor = "#FFF3DF"
+redColor = "#C42B1C"
+redTextColor = "#A8241A"
+redBackgroundColor = "#FCEBE9"
+yellowColor = "#B86E00"
+yellowTextColor = "#8A5300"
+yellowBackgroundColor = "#FFF3DF"
+blueColor = "#0A64D6"
+blueTextColor = "#0A55B5"
+blueBackgroundColor = "#EAF2FC"
+grayColor = "#6B6B70"
+grayTextColor = "#5E5E63"
+grayBackgroundColor = "#EFEFEC"
+
+# Typography: the platform system font (SF Pro on macOS) with safe fallbacks
+font = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+headingFont = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+baseFontSize = 15
+headingFontSizes = ["2.1rem", "1.3rem", "1.05rem", "0.95rem", "0.9rem", "0.85rem"]
+headingFontWeights = [650, 600, 600, 600, 600, 600]
+metricValueFontSize = "1.75rem"
+metricValueFontWeight = 600
+
+# Geometry
+baseRadius = "0.625rem"
+buttonRadius = "0.5rem"
+
+# Charts: validated palette (blue, orange, aqua first; see visualization/plots.py)
+chartCategoricalColors = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#6250d6", "#e34948"]
 
 [server]
 headless = true
@@ -8,3 +60,6 @@ port = 8501
 
 [browser]
 gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"
