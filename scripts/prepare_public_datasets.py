@@ -102,13 +102,22 @@ def run_metu(repo: Repository, redownload: bool) -> None:
     key = "metu_simpl"
     print("\n=== METU-SIMPL ===")
     try:
-        if redownload or not (raw_dir(key) / "MANIFEST.json").exists():
+        manifest_path = raw_dir(key) / "MANIFEST.json"
+        have_all = all((raw_dir(key) / f).exists() for f in metu_simpl.FILES)
+        recorded = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.exists() else None
+        if redownload or not have_all or recorded is None:
             manifest = metu_simpl.download()
         else:
             manifest = metu_simpl.verify()
-        write_stage(key, "download", True, f"Downloaded commit {manifest['commit'][:8]}",
-                    files=list(manifest["files"]))
-        print(f"download OK: commit {manifest['commit'][:8]}, files {list(manifest['files'])}")
+        changed = []
+        if recorded:
+            changed = [f for f, m in manifest["files"].items()
+                       if recorded["files"].get(f, {}).get("sha256") != m["sha256"]]
+        note = (f" WARNING: upstream files differ from the recorded download ({', '.join(changed)}); results may "
+                "not reproduce the documented metrics." if changed else "")
+        write_stage(key, "download", True, f"Commit {manifest['commit'][:8]}.{note}", files=list(manifest["files"]),
+                    changed_since_recorded=changed)
+        print(f"download OK: commit {manifest['commit'][:8]}, files {list(manifest['files'])}{note}")
     except Exception as exc:
         write_stage(key, "download", False, str(exc))
         print(f"download FAILED: {exc}")
