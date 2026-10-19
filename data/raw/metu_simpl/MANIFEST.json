@@ -1,0 +1,38 @@
+{
+  "source": "https://github.com/METU-SIMPL/Microstrip-Patch.git",
+  "commit": "7113818a1da9aead6a84852111deec5f075af8eb",
+  "downloaded_at": "2026-10-19T17:57:50+00:00",
+  "files": {
+    "README.md": {
+      "bytes": 2040,
+      "sha256": "04b2178291c4d9f27ff53d72b10f2aa71cecf8a7521011b5e883ceeaab7a364a"
+    },
+    "input_parameters.xlsx": {
+      "bytes": 818567,
+      "sha256": "ee668c97acf5fafeabe97a9ccb2bb4960800464de5b089059fcb1b9250c02cc6"
+    },
+    "S11_re.xlsx": {
+      "bytes": 11890242,
+      "sha256": "6cba936ea69257ea2446bd08de7d151df4365f06e541f9c6a3d2635d36967a2e"
+    },
+    "S11_im.xlsx": {
+      "bytes": 11863817,
+      "sha256": "3af42f06a865ba0d46d52c04423c3018e0c8ea5f334a0b37028864fa76c36dc3"
+    },
+    "antenna_model.aedt": {
+      "bytes": 208674,
+      "sha256": "0236f098919a7531ea5700436a9439d43d84da69dd56c8325730140c49cefbd6"
+    }
+  },
+  "repository_files": [
+    "README.md",
+    "S11_im.xlsx",
+    "S11_re.xlsx",
+    "antenna_model.aedt",
+    "input_parameters.xlsx"
+  ],
+  "license_files_found": [],
+  "license_note": "No license file in the repository (checked at the downloaded commit). The README requests citation of the associated publication and acknowledgement of the authors. Used here for non-commercial academic analysis with citation; files are not redistributed.",
+  "citation": "E. S. Sa\u00e7\u0131n and A. C. Durgun, \"Microstrip Patch Antenna Modeling Using Neural Networks with Knowledge-Based Regularization,\" Neural Computing and Applications, vol. 37, pp. 3827\u20133837, 2025, doi:10.1007/s00521-024-10860-5.",
+  "data_kind": "EM simulation (Ansys HFSS)"
+}

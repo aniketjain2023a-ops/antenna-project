@@ -19,7 +19,7 @@ from ui import theme
 from ui.common import active_frame, get_repo, load_model
 from visualization import plots
 
-DEFAULT_MODELS = ["dummy", "random_forest", "extra_trees", "gradient_boosting", "gaussian_process"]
+DEFAULT_MODELS = ["dummy", "random_forest", "gradient_boosting"]
 
 
 # =============================================================================== dataset
@@ -306,7 +306,7 @@ def _results_panel(ds: dict) -> None:
     exps = repo.list_experiments(dataset_id=ds["id"])
     if not exps:
         theme.empty_state("No models trained yet",
-                          "Choose models above and press Train models. The default set takes about 30 seconds; "
+                          "Choose models above and press Train models. The default set takes under a minute; "
                           "metrics, plots and the active model for each target will appear here.",
                           ":material/model_training:")
         return
@@ -363,9 +363,9 @@ def _results_panel(ds: dict) -> None:
 # ================================================================================== page
 def render() -> None:
     df, ds, warnings = active_frame()
-    theme.page_header("Dataset & Model",
-                      "Load antenna geometry–performance data, check its quality, and train surrogate models "
-                      "that predict S11 and gain from geometry.")
+    theme.page_header("MetaOpt-AI",
+                      "Machine-learning surrogates for antenna performance prediction and geometry optimization. "
+                      "Start here: check the active dataset, then train and compare models.")
     bar = st.empty()  # filled at the end of the run, so it reflects models trained just now
     theme.synthetic_notice(ds)
     for w in warnings:

@@ -21,8 +21,8 @@ from sklearn.pipeline import Pipeline
 
 UNCERTAINTY_DISCLAIMER = (
     "Uncertainty values are APPROXIMATE model-based indicators (GP predictive std or tree-ensemble "
-    "spread). They are not calibrated confidence intervals and do not include errors of the "
-    "synthetic data-generating formula or of real EM physics."
+    "spread). They are not calibrated confidence intervals and do not include errors in the training data "
+    "itself (simulation settings, mesh, or formula assumptions) or differences from a fabricated antenna."
 )
 
 

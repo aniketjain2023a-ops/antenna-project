@@ -40,25 +40,48 @@ OBJECTIVE_DESCRIPTIONS = {
     "max_gain": "Maximize predicted gain subject to S11 <= limit",
     "min_s11": "Minimize predicted S11 subject to gain >= limit",
     "tradeoff": "Normalized weighted gain / S11 trade-off (optional constraints)",
+    "minimize_target": "Minimize one predicted target (optional constraints)",
+    "maximize_target": "Maximize one predicted target (optional constraints)",
 }
 
-DIRECTION = {"S11_dB": "minimize", "Gain_dBi": "maximize", "Bandwidth_MHz": "maximize"}
+# Optimisation direction of every known target (taken from config.KNOWN_COLUMNS).
+DIRECTION = {name: meta["direction"] for name, meta in config.KNOWN_COLUMNS.items() if meta.get("direction")}
 
 
 class SurrogateEvaluator:
-    """Calls the trained models; counts every design evaluated."""
+    """Calls the trained models; counts every design evaluated.
 
-    def __init__(self, models: dict[str, LoadedModel]):
+    ``fixed`` holds parameters that are NOT optimised (e.g. materials and layer thicknesses); they
+    are kept at the given values. ``features`` lists only the free parameters the optimizer varies,
+    while ``all_features`` is the full model input in its original order.
+    """
+
+    def __init__(self, models: dict[str, LoadedModel], fixed: dict[str, float] | None = None):
         if not models:
             raise ValueError("At least one trained model is required.")
         self.models = models
-        self.features = check_feature_consistency(models)
+        self.all_features = check_feature_consistency(models)
+        unknown = [f for f in (fixed or {}) if f not in self.all_features]
+        if unknown:
+            raise ValueError(f"Fixed parameters are not model inputs: {unknown}")
+        self.fixed = {f: float(v) for f, v in (fixed or {}).items()}
+        self.features = [f for f in self.all_features if f not in self.fixed]
+        if not self.features:
+            raise ValueError("Choose at least one parameter to optimize.")
         self.n_evals = 0
+
+    def full(self, X) -> np.ndarray:
+        """Expand free-parameter rows to full model inputs (fixed values inserted)."""
+        X = np.atleast_2d(np.asarray(X, dtype=float))
+        out = np.empty((X.shape[0], len(self.all_features)))
+        for i, f in enumerate(self.all_features):
+            out[:, i] = self.fixed[f] if f in self.fixed else X[:, self.features.index(f)]
+        return out
 
     def __call__(self, X) -> dict[str, tuple[np.ndarray, np.ndarray | None]]:
         X = np.atleast_2d(np.asarray(X, dtype=float))
         self.n_evals += X.shape[0]
-        return predict_batch(self.models, X)
+        return predict_batch(self.models, self.full(X))
 
 
 @dataclass
@@ -71,6 +94,7 @@ class ObjectiveConfig:
     penalty_weight: float = config.CONSTRAINT_PENALTY_WEIGHT
     s11_target: str = "S11_dB"
     gain_target: str = "Gain_dBi"
+    target: str | None = None          # for minimize_target / maximize_target
 
     def validate(self, available_targets: list[str]) -> None:
         if self.kind not in OBJECTIVE_DESCRIPTIONS:
@@ -79,6 +103,8 @@ class ObjectiveConfig:
             raise ValueError(f"Objective requires a trained model for {self.gain_target}.")
         if self.kind == "min_s11" and self.s11_target not in available_targets:
             raise ValueError(f"Objective requires a trained model for {self.s11_target}.")
+        if self.kind in ("minimize_target", "maximize_target") and self.target not in available_targets:
+            raise ValueError(f"Objective needs a trained model for '{self.target}'.")
         if self.kind == "tradeoff":
             usable = {t: w for t, w in self.weights.items() if t in available_targets and w > 0}
             if not usable:
@@ -99,7 +125,7 @@ class ObjectiveConfig:
 
     def to_dict(self) -> dict:
         return {
-            "kind": self.kind, "description": OBJECTIVE_DESCRIPTIONS[self.kind],
+            "kind": self.kind, "description": OBJECTIVE_DESCRIPTIONS[self.kind], "target": self.target,
             "weights": self.weights, "normalization": {k: list(v) for k, v in self.normalization.items()},
             "kappa": self.kappa, "penalty_weight": self.penalty_weight,
             "constraints": [c.to_dict() for c in self.constraints],
@@ -126,6 +152,10 @@ def evaluate_objective(cfg: ObjectiveConfig, preds: dict) -> dict[str, np.ndarra
         raw = -eff[cfg.gain_target]
     elif cfg.kind == "min_s11":
         raw = eff[cfg.s11_target].copy()
+    elif cfg.kind == "minimize_target":
+        raw = eff[cfg.target].copy()
+    elif cfg.kind == "maximize_target":
+        raw = -eff[cfg.target]
     else:
         usable = {t: w for t, w in cfg.weights.items() if t in eff and w > 0}
         total_w = sum(usable.values())
@@ -161,10 +191,12 @@ def make_scalar_objective(evaluator: SurrogateEvaluator, cfg: ObjectiveConfig):
 
 def describe_point(evaluator: SurrogateEvaluator, cfg: ObjectiveConfig, x) -> dict:
     """Full breakdown (predictions, uncertainty, objective, violations) of one design."""
-    preds = predict_batch(evaluator.models, np.atleast_2d(np.asarray(x, dtype=float)))
+    full = evaluator.full(np.asarray(x, dtype=float))
+    preds = predict_batch(evaluator.models, full)
     ev = evaluate_objective(cfg, preds)
     return {
-        "parameters": {f: float(v) for f, v in zip(evaluator.features, np.asarray(x, dtype=float).ravel())},
+        "parameters": {f: float(v) for f, v in zip(evaluator.all_features, full[0])},
+        "free_parameters": list(evaluator.features),
         "predictions": {t: float(m[0]) for t, (m, s) in preds.items()},
         "uncertainty": {t: (None if s is None else float(s[0])) for t, (m, s) in preds.items()},
         "objective_raw": float(ev["raw"][0]),

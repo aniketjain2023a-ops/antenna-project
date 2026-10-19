@@ -99,3 +99,16 @@ def baseline_candidate_png(rows: pd.DataFrame, targets: list[str], path: Path) -
         ax.tick_params(axis="x", labelsize=7, rotation=30)
         ax.grid(axis="y", alpha=0.25)
     return _save(fig, path)
+
+
+def residual_png(y_true, y_pred, target: str, title: str, path: Path) -> Path:
+    resid = np.asarray(y_true) - np.asarray(y_pred)
+    fig, ax = plt.subplots(figsize=(5, 4))
+    ax.scatter(y_pred, resid, s=14, color=SERIES[1], edgecolor="white", linewidth=0.4)
+    ax.axhline(0, ls="--", color=MUTED, lw=1.5)
+    unit = label_of(target).split("[")[-1].rstrip("]") if "[" in label_of(target) else ""
+    ax.set_xlabel(f"Predicted {label_of(target)}")
+    ax.set_ylabel(f"Residual (actual − predicted){f' [{unit}]' if unit else ''}")
+    ax.set_title(title, fontsize=9)
+    ax.grid(alpha=0.25)
+    return _save(fig, path)

@@ -84,6 +84,8 @@ def explain_candidate(c: dict, cfg: ObjectiveConfig) -> str:
         parts.append(f"ranked by gain {c['predictions'].get(cfg.gain_target, float('nan')):.2f} dBi")
     elif cfg.kind == "min_s11":
         parts.append(f"ranked by S11 {c['predictions'].get(cfg.s11_target, float('nan')):.2f} dB")
+    elif cfg.kind in ("minimize_target", "maximize_target"):
+        parts.append(f"ranked by {cfg.target} {c['predictions'].get(cfg.target, float('nan')):.3f}")
     else:
         parts.append(f"normalized trade-off score {-c['objective_raw']:.3f} (higher is better)")
     unc = [f"{t} +/-{u:.2f}" for t, u in c["uncertainty"].items() if u is not None]

@@ -26,12 +26,19 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
+python scripts/prepare_public_datasets.py   # downloads + models the public datasets (about 2 min)
 streamlit run app.py              # opens http://localhost:8501
 ```
 
+`prepare_public_datasets.py` downloads **METU-SIMPL** (HFSS-simulated microstrip patches) from
+GitHub, verifies checksums, preprocesses it into `data/processed/metu_simpl/`, trains Dummy, Random
+Forest and Gradient Boosting models, and writes metrics and figures to `results/metu_simpl/`. It
+also tries the **Zenodo** record and reports clearly if it cannot be downloaded. A dataset appears in
+the app only when its whole pipeline succeeded. See `DATASET_COMPARISON.md`.
+
 On first start the app creates `data/metaopt_ai.db`, generates
 `data/synthetic_demo.csv` if missing, and registers it as a SYNTHETIC dataset.
-On **Dataset & Model**, press **Train models** (about 30 s with the default set).
+On **Home**, press **Train models** if the active dataset has no models yet (the public-data script already trains METU-SIMPL).
 Prediction, optimization and the results pages then have models to use.
 
 Optional headless run of the whole workflow (training with tuning, three
@@ -50,13 +57,13 @@ python -m pytest            # 51 tests, about 80 s
 
 ## 2. Sections
 
-The interface has three sections, shown in the top navigation bar.
+The interface has three pages, shown in the top navigation bar.
 
-| Section | What it does |
+| Page | What it does |
 |---|---|
-| **Dataset & Model** | Active dataset with provenance badge; data quality (missing values, duplicates, IQR outliers), preview, statistics and distributions; CSV/Excel import with column mapping, cleaning summary and mandatory provenance; model training (models, features, targets, split, CV folds, optional tuning under *Advanced*) with live progress; model comparison table (R², MAE, RMSE, CV R²) and actual-vs-predicted plots; active model per target |
-| **Predict & Optimize** | Antenna parameters with units, valid ranges and inline validation → predicted S11 and gain with approximate uncertainty, model metrics and provenance; save to history. Separately: Differential Evolution optimization (objective, constraint, bounds, baseline, budget, seed; other algorithms and risk aversion under *Advanced*) → baseline vs ML-selected candidate side by side with changes; search diagnostics |
-| **Results & History** | Tabs: model performance (comparison chart, table, actual-vs-predicted and residuals); explainability (permutation and impurity importance, parameter sensitivity, partial dependence and uncertainty map); optimization history (baseline vs candidate per run); data & export (provenance, CSV downloads, ZIP, PDF report, searchable SQLite records, limitations) |
+| **Home** | Active dataset with provenance badge; data quality, preview, statistics and distributions; CSV/Excel import with column mapping and mandatory provenance; model training (Dummy, Random Forest, Gradient Boosting by default) with live progress; comparison table (R², MAE, RMSE, CV R²) and actual-vs-predicted plots; active model per target |
+| **Design & Optimize** | Dataset selector (only datasets whose pipeline completed). The parameter form matches the selected dataset's inputs, units and ranges, and returns predicted targets with uncertainty and model metrics. Separately, Differential Evolution optimization (objective, optional constraint, parameters to vary, bounds, baseline) shows baseline vs ML-selected candidate side by side, with diagnostics including the nearest actually-simulated design |
+| **Results** | Tabs: across-dataset comparison (every metric labelled with its dataset); model performance; explainability (importance, sensitivity, partial dependence, uncertainty); optimization history; data & export (provenance, CSV, ZIP, PDF, searchable records) |
 
 ### Design system
 

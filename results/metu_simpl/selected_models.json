@@ -1,0 +1,38 @@
+{
+  "BW10_MHz": {
+    "experiment_id": 21,
+    "model": "random_forest",
+    "cv_r2": 0.5427528863026764,
+    "test_r2": 0.5465697308783348,
+    "test_rmse": 329.2695549758965,
+    "test_mae": 248.84370677731675,
+    "artifact": "models/exp00021_random_forest_default_BW10_MHz.joblib"
+  },
+  "S11_28GHz_dB": {
+    "experiment_id": 12,
+    "model": "random_forest",
+    "cv_r2": 0.39185174549652135,
+    "test_r2": 0.4414051313861269,
+    "test_rmse": 2.1174616839650318,
+    "test_mae": 1.1099768538726666,
+    "artifact": "models/exp00012_random_forest_default_S11_28GHz_dB.joblib"
+  },
+  "S11_min_dB": {
+    "experiment_id": 15,
+    "model": "random_forest",
+    "cv_r2": 0.4840172306229418,
+    "test_r2": 0.48655931755847837,
+    "test_rmse": 5.992469641182607,
+    "test_mae": 3.862310929518667,
+    "artifact": "models/exp00015_random_forest_default_S11_min_dB.joblib"
+  },
+  "f_res_GHz": {
+    "experiment_id": 18,
+    "model": "random_forest",
+    "cv_r2": 0.6500714120705033,
+    "test_r2": 0.6786526492983109,
+    "test_rmse": 1.5498245806971271,
+    "test_mae": 1.1427531939605116,
+    "artifact": "models/exp00018_random_forest_default_f_res_GHz.joblib"
+  }
+}

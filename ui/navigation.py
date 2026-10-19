@@ -9,13 +9,11 @@ import streamlit as st
 
 @cache
 def pages() -> dict[str, "st.Page"]:
-    from ui import dataset_model, predict_optimize, results_history
+    from ui import dataset_model, design_optimize, results_history
 
     return {
-        "dataset": st.Page(dataset_model.render, title="Dataset & Model", icon=":material/database:",
-                           url_path="dataset", default=True),
-        "predict": st.Page(predict_optimize.render, title="Predict & Optimize", icon=":material/tune:",
-                           url_path="predict"),
-        "results": st.Page(results_history.render, title="Results & History", icon=":material/insights:",
-                           url_path="results"),
+        "home": st.Page(dataset_model.render, title="Home", icon=":material/home:", url_path="home", default=True),
+        "design": st.Page(design_optimize.render, title="Design & Optimize", icon=":material/tune:",
+                          url_path="design"),
+        "results": st.Page(results_history.render, title="Results", icon=":material/insights:", url_path="results"),
     }

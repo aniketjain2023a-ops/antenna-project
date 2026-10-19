@@ -42,12 +42,55 @@ def _permutation(experiment_id: int, artifact_path: str) -> pd.DataFrame:
     return permutation_importance_frame(lm.pipeline, p["X_test"], p["y_test"], lm.features, seed=p.get("seed", 42))
 
 
+# ====================================================================== across datasets
+def _dataset_label(ds: dict) -> str:
+    from datasets.public import SOURCES
+
+    for meta in SOURCES.values():
+        if meta["dataset_name"] == ds["name"]:
+            return meta["label"]
+    return "Synthetic demo" if ds["dataset_type"] == "SYNTHETIC" else ds["name"]
+
+
+def _comparison_tab() -> None:
+    repo = get_repo()
+    rows = []
+    for ds in repo.list_datasets():
+        latest = {}
+        for e in repo.list_experiments(dataset_id=ds["id"]):          # newest first
+            latest.setdefault((e["target_variable"], e["model_type"], e["variant"]), e)
+        for e in latest.values():
+            rows.append({"Dataset": _dataset_label(ds), "Data type": ds["dataset_type"].title(),
+                         "Target": config.short_label(e["target_variable"]), "Unit": config.unit_of(e["target_variable"]),
+                         "Model": model_label(e["model_type"]), "Variant": e["variant"], "Test R²": e["r2"],
+                         "Test MAE": e["mae"], "Test RMSE": e["rmse"], "CV R²": e["cv_r2_mean"],
+                         "Train / test rows": f"{e['n_train']} / {e['n_test']}"})
+    if not rows:
+        theme.empty_state("No models trained yet", "Train models on the Home page.", ":material/model_training:")
+        return
+    frame = pd.DataFrame(rows).sort_values(["Dataset", "Target", "Test R²"], ascending=[True, True, False])
+    with theme.card("results-compare"):
+        st.markdown("**Model performance by dataset** · latest run of each model, held-out test sets")
+        chart_frame = frame[frame["Variant"] == "default"].rename(columns={"Model": "model", "Variant": "variant",
+                                                                          "Test R²": "test_R2"})
+        chart_frame["target"] = chart_frame["Dataset"] + " · " + chart_frame["Target"]
+        theme.chart(plots.metric_comparison(chart_frame, "test_R2"),
+                    "Each bar group is one dataset and target. R² is unitless, so it can be shown side by side; it "
+                    "does NOT mean the datasets are comparable — they describe different antennas and targets.",
+                    key="cross_r2")
+        st.dataframe(frame, hide_index=True, width="stretch", column_config={
+            c: st.column_config.NumberColumn(format="%.3f") for c in ("Test R²", "Test MAE", "Test RMSE", "CV R²")})
+        st.caption("MAE and RMSE are in each target's own unit (column Unit) and cannot be compared across targets. "
+                   "No model was evaluated on another dataset: the inputs differ, so cross-dataset evaluation is not "
+                   "meaningful (see DATASET_COMPARISON.md).")
+
+
 # ========================================================================= performance
 def _performance_tab(ds: dict, exps: list[dict], active_ids: set[int]) -> None:
     if not exps:
-        theme.empty_state("No experiments yet", "Train models on the Dataset & Model page; every run is logged here.",
+        theme.empty_state("No experiments yet", "Train models on the Home page; every run is logged here.",
                           ":material/model_training:")
-        st.page_link(pages()["dataset"], label="Go to Dataset & Model", icon=":material/arrow_forward:")
+        st.page_link(pages()["home"], label="Go to Home", icon=":material/arrow_forward:")
         return
     table = metrics_frame(exps)
     with theme.card("results-1"):
@@ -154,8 +197,8 @@ def _history_tab(ds: dict, exp_ids: set[int]) -> None:
     runs = [r for r in get_repo().list_optimization_runs() if r["model_experiment_id"] in exp_ids]
     if not runs:
         theme.empty_state("No optimization runs yet",
-                          "Run an optimization on the Predict & Optimize page; each run is saved here.", ":material/tune:")
-        st.page_link(pages()["predict"], label="Go to Predict & Optimize", icon=":material/arrow_forward:")
+                          "Run an optimization on the Design & Optimize page; each run is saved here.", ":material/tune:")
+        st.page_link(pages()["design"], label="Go to Design & Optimize", icon=":material/arrow_forward:")
         return
     rows = []
     for r in runs:
@@ -261,12 +304,12 @@ def _export_tab(ds: dict) -> None:
 def render() -> None:
     _, ds, warnings = active_frame()
     repo = get_repo()
-    theme.page_header("Results & History",
+    theme.page_header("Results",
                       "Every model, prediction and optimization run is stored in SQLite. Review, explain and "
                       "export them here.")
     if ds is None:
         theme.context_bar(None)
-        theme.empty_state("No dataset available", "Load a dataset on the Dataset & Model page first.", ":material/table:")
+        theme.empty_state("No dataset available", "Load a dataset on the Home page first.", ":material/table:")
         return
     exps = repo.list_experiments(dataset_id=ds["id"])
     active_ids = {e["id"] for e in workflow.get_active_experiments(repo, ds["id"]).values()}
@@ -274,8 +317,10 @@ def render() -> None:
     theme.synthetic_notice(ds)
     for w in warnings:
         st.warning(w, icon=":material/warning:")
-    perf, explain, history, export = st.tabs(["Model performance", "Explainability", "Optimization history",
-                                              "Data & export"])
+    compare, perf, explain, history, export = st.tabs(["Across datasets", "Model performance", "Explainability",
+                                                       "Optimization history", "Data & export"])
+    with compare:
+        _comparison_tab()
     with perf:
         _performance_tab(ds, exps, active_ids)
     with explain:

@@ -12,3 +12,11 @@ reports/*
 !reports/.gitkeep
 logs/*.log*
 .DS_Store
+# Public datasets: downloaded locally by scripts/prepare_public_datasets.py, not redistributed
+# (METU-SIMPL has no license file). Only small metadata files are committed.
+data/raw/*/*
+!data/raw/*/MANIFEST.json
+!data/raw/*/DOWNLOAD_STATUS.json
+data/processed/*/*
+!data/processed/*/preprocessing_summary.json
+results/*/test_predictions.csv

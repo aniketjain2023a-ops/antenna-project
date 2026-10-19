@@ -5,6 +5,12 @@
 | `synthetic_demo.csv` | **SYNTHETIC** demonstration dataset (500 rows). Created automatically by `datasets/synthetic.py` on first start if missing. |
 | `metaopt_ai.db` | SQLite database (created automatically; not committed to git). |
 | `registered/` | Cleaned copies of datasets uploaded through the dashboard (not committed). |
+| `raw/metu_simpl/` | METU-SIMPL originals, unchanged (downloaded by `scripts/prepare_public_datasets.py`; only `MANIFEST.json` is committed) |
+| `processed/metu_simpl/` | Modelling table and S11 curves derived from the raw files (only `preprocessing_summary.json` is committed) |
+| `raw/zenodo/` | Zenodo record 15866865: download FAILED in the build environment (`DOWNLOAD_STATUS.json`) |
+
+The public sources, their licences, and how their targets are defined are documented in
+`../DATASET_COMPARISON.md`.
 
 ## The synthetic dataset is NOT real antenna data
 

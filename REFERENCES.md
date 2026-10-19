@@ -29,6 +29,15 @@ results. All results come from this software running on synthetic data.
    equivalents of metamaterials," *IEEE Antennas and Propagation Magazine*, vol. 54,
    no. 2, pp. 10-35, 2012. doi:10.1109/MAP.2012.6230714
 
+### Datasets used
+* E. S. Saçın and A. C. Durgun, "Microstrip Patch Antenna Modeling Using Neural Networks with
+  Knowledge-Based Regularization," *Neural Computing and Applications*, vol. 37, pp. 3827–3837, 2025.
+  doi:10.1007/s00521-024-10860-5. Dataset: https://github.com/METU-SIMPL/Microstrip-Patch (commit
+  7113818a). Details taken from the dataset's own README (citation requested by the authors).
+* Zenodo record 15866865, https://zenodo.org/records/15866865: **NOT inspected** (unreachable from
+  the build environment); its title, authors and license are unknown. Do not cite it until you have
+  opened the record.
+
 ### Machine-learning algorithms
 4. L. Breiman, "Random forests," *Machine Learning*, vol. 45, no. 1, pp. 5-32, 2001.
    doi:10.1023/A:1010933404324 (Random Forest and permutation importance.)

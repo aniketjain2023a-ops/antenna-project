@@ -71,7 +71,7 @@ def load_active_models(dataset_id: int) -> tuple[dict[str, LoadedModel], str | N
         experiments = workflow.get_active_experiments(get_repo(), dataset_id)
         return {t: load_model(e) for t, e in experiments.items()}, None
     except Exception as exc:  # corrupted or deleted artefact
-        return {}, f"Could not load the trained models ({exc}). Retrain them on the Dataset & Model page."
+        return {}, f"Could not load the trained models ({exc}). Retrain them on the Home page."
 
 
 def fmt_unc(value, unit: str) -> str:

@@ -294,12 +294,19 @@ def run_optimization(repo: Repository, models: dict[str, LoadedModel], cfg: Obje
         raise ValueError(f"Unknown algorithm(s): {unknown}")
     if budget < 50:
         raise ValueError("Evaluation budget must be at least 50.")
-    evaluator = SurrogateEvaluator(models)
+    all_features = next(iter(models.values())).features
+    base_check = validate_geometry(baseline, all_features, None)
+    base_check.raise_if_invalid()
+    # Parameters without bounds are not optimised: they stay at the baseline value.
+    fixed = {f: float(baseline[f]) for f in all_features if f not in bounds}
+    evaluator = SurrogateEvaluator(models, fixed=fixed)
     cfg.validate(list(models))
     train_ranges = model_training_ranges(models)
     bound_warnings = check_bounds(bounds, train_ranges, allow_extrapolation)
-    base_check = validate_geometry(baseline, evaluator.features, None)
-    base_check.raise_if_invalid()
+    if not allow_extrapolation:
+        outside = validate_geometry({f: baseline[f] for f in fixed}, list(fixed), train_ranges).warnings
+        if outside:
+            raise ValidationError("Fixed parameters lie outside the training range: " + " ".join(outside))
     bnds = bounds_array(bounds, evaluator.features)
     x_base = np.array([float(baseline[f]) for f in evaluator.features])
     base_desc = describe_point(evaluator, cfg, x_base)
@@ -321,7 +328,8 @@ def run_optimization(repo: Repository, models: dict[str, LoadedModel], cfg: Obje
                 model_experiment_id=first["id"],
                 model_experiment_ids={t: m.experiment["id"] for t, m in models.items()},
                 algorithm=algo, random_seed=seed, evaluation_budget=budget, evaluations_used=outcome.n_evals,
-                objective_function=cfg.kind, objective_config={**cfg.to_dict(), "algorithm_settings": outcome.settings},
+                objective_function=cfg.kind, objective_config={**cfg.to_dict(), "algorithm_settings": outcome.settings,
+                                                                "fixed_parameters": fixed},
                 parameter_bounds={f: list(bnds[i]) for i, f in enumerate(evaluator.features)},
                 constraints=[c.to_dict() for c in cfg.constraints], baseline_design=base_desc["parameters"],
                 baseline_predictions=base_desc["predictions"], candidate_parameters=cand["parameters"],

@@ -67,6 +67,55 @@ KNOWN_COLUMNS: dict[str, dict] = {
                       "description": "-10 dB impedance bandwidth (only if supplied by real data)"},
 }
 
+# METU-SIMPL microstrip patch (HFSS) columns. Meanings and units verified against the
+# variables in the published HFSS project (antenna_model.aedt). "group" orders the
+# parameter form; "optimize_default" marks the parameters the optimizer varies by default
+# (the others are held at the baseline, e.g. materials and layer thicknesses).
+KNOWN_COLUMNS.update({
+    "patch_length_mm": {"unit": "mm", "kind": "input", "group": "Patch", "short": "Patch length",
+                        "description": "Patch length (l_patch)", "optimize_default": True},
+    "patch_width_mm": {"unit": "mm", "kind": "input", "group": "Patch", "short": "Patch width",
+                       "description": "Patch width (w_patch)", "optimize_default": True},
+    "patch_thickness_mm": {"unit": "mm", "kind": "input", "group": "Patch", "short": "Copper thickness",
+                           "description": "Patch copper thickness (h_patch)"},
+    "feed_position_ratio": {"unit": "", "kind": "input", "group": "Probe feed", "short": "Feed position",
+                            "description": "Probe offset as a fraction of patch length (c_probe; d_probe = c_probe × l_patch)",
+                            "optimize_default": True},
+    "probe_radius_mm": {"unit": "mm", "kind": "input", "group": "Probe feed", "short": "Probe radius",
+                        "description": "Probe radius (r_probe)"},
+    "pad_clearance_mm": {"unit": "mm", "kind": "input", "group": "Probe feed", "short": "Pad clearance",
+                         "description": "Pad clearance (c_pad; r_pad = r_probe + c_pad)", "min_valid": 0.0},
+    "antipad_clearance_mm": {"unit": "mm", "kind": "input", "group": "Probe feed", "short": "Antipad clearance",
+                             "description": "Ground antipad clearance (c_antipad; r_antipad = r_pad + c_antipad)"},
+    "substrate_height_mm": {"unit": "mm", "kind": "input", "group": "Stack-up", "short": "Substrate height",
+                            "description": "Substrate thickness (h_subs)"},
+    "solder_resist_height_mm": {"unit": "mm", "kind": "input", "group": "Stack-up", "short": "Solder-resist height",
+                                "description": "Solder-resist layer thickness (h_sr)"},
+    "substrate_eps_r": {"unit": "", "kind": "input", "group": "Stack-up", "short": "Substrate εr",
+                        "description": "Substrate relative permittivity ($e1)"},
+    "solder_resist_eps_r": {"unit": "", "kind": "input", "group": "Stack-up", "short": "Solder-resist εr",
+                            "description": "Solder-resist relative permittivity ($e2)"},
+    "S11_28GHz_dB": {"unit": "dB", "kind": "target", "direction": "minimize", "short": "S11 at 28 GHz",
+                     "description": "|S11| at 28.00 GHz from the HFSS frequency sweep"},
+    "S11_min_dB": {"unit": "dB", "kind": "target", "direction": "minimize", "short": "Min S11 (23–33 GHz)",
+                   "description": "Deepest |S11| within the simulated 23–33 GHz band"},
+    "f_res_GHz": {"unit": "GHz", "kind": "target", "short": "Resonant frequency",
+                  "description": "Frequency of the deepest |S11|, only where it lies strictly inside 23–33 GHz"},
+    "BW10_MHz": {"unit": "MHz", "kind": "target", "direction": "maximize", "short": "−10 dB bandwidth",
+                 "description": "Width of the contiguous |S11| ≤ −10 dB region around the minimum, only where it lies "
+                                "fully inside 23–33 GHz"},
+})
+for _k, _short in {"L_mm": "Length L", "G_mm": "Gap G", "S11_dB": "S11", "Gain_dBi": "Gain",
+                   "Bandwidth_MHz": "Bandwidth"}.items():
+    KNOWN_COLUMNS[_k].setdefault("short", _short)
+    KNOWN_COLUMNS[_k].setdefault("group", "Geometry")
+KNOWN_COLUMNS["L_mm"]["optimize_default"] = True
+KNOWN_COLUMNS["G_mm"]["optimize_default"] = True
+
+PUBLIC_RAW_DIR = DATA_DIR / "raw"
+PUBLIC_PROCESSED_DIR = DATA_DIR / "processed"
+RESULTS_DIR = BASE_DIR / "results"
+
 # Sanity limits for geometry parameters (mm). These are NOT design bounds; they
 # only reject physically meaningless inputs such as negative lengths.
 GEOMETRY_SANITY_LIMITS = (1e-3, 1000.0)
@@ -109,7 +158,13 @@ def unit_of(column: str) -> str:
     return KNOWN_COLUMNS.get(column, {}).get("unit", "")
 
 
+def short_label(column: str) -> str:
+    """Plain-language name, e.g. ``S11 at 28 GHz`` for ``S11_28GHz_dB``."""
+    return KNOWN_COLUMNS.get(column, {}).get("short", column)
+
+
 def label_of(column: str) -> str:
-    """Return a human readable axis label with units, e.g. ``S11_dB [dB]``."""
+    """Return a human readable axis label with units, e.g. ``Patch length [mm]``."""
     unit = unit_of(column)
-    return f"{column} [{unit}]" if unit else column
+    name = short_label(column)
+    return f"{name} [{unit}]" if unit else name

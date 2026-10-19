@@ -1,0 +1,89 @@
+{
+  "source": "https://github.com/METU-SIMPL/Microstrip-Patch.git",
+  "commit": "7113818a1da9aead6a84852111deec5f075af8eb",
+  "downloaded_at": "2026-10-19T17:57:50+00:00",
+  "rows_raw": 5000,
+  "rows_processed": 5000,
+  "duplicate_input_rows_removed": 0,
+  "rows_with_missing_inputs_removed": 0,
+  "features": [
+    "patch_length_mm",
+    "patch_width_mm",
+    "patch_thickness_mm",
+    "substrate_height_mm",
+    "solder_resist_height_mm",
+    "probe_radius_mm",
+    "pad_clearance_mm",
+    "antipad_clearance_mm",
+    "feed_position_ratio",
+    "substrate_eps_r",
+    "solder_resist_eps_r"
+  ],
+  "targets": [
+    "S11_28GHz_dB",
+    "S11_min_dB",
+    "f_res_GHz",
+    "BW10_MHz"
+  ],
+  "target_non_missing": {
+    "S11_28GHz_dB": 5000,
+    "S11_min_dB": 5000,
+    "f_res_GHz": 2866,
+    "BW10_MHz": 1201
+  },
+  "censoring": {
+    "f_res_GHz": "missing where the |S11| minimum lies on a band edge (resonance outside 23\u201333 GHz)",
+    "BW10_MHz": "missing where min |S11| > \u221210 dB or the \u221210 dB region reaches a band edge"
+  },
+  "frequency_sweep_GHz": [
+    23.0,
+    33.0,
+    0.05
+  ],
+  "feature_ranges": {
+    "patch_length_mm": [
+      1.8000672884373585,
+      5.199918674387732
+    ],
+    "patch_width_mm": [
+      1.8005131467522635,
+      5.199351958506949
+    ],
+    "patch_thickness_mm": [
+      0.010001844192279582,
+      0.0399941041848386
+    ],
+    "substrate_height_mm": [
+      0.10003193888620043,
+      0.7999396184563476
+    ],
+    "solder_resist_height_mm": [
+      0.020000098846331676,
+      0.09999833115375256
+    ],
+    "probe_radius_mm": [
+      0.015001750435782788,
+      0.04999324799426502
+    ],
+    "pad_clearance_mm": [
+      3.1431043994498893e-06,
+      0.024996257124313453
+    ],
+    "antipad_clearance_mm": [
+      0.025013868160519925,
+      0.099987331513263
+    ],
+    "feed_position_ratio": [
+      0.050051877734520425,
+      0.44996174425112617
+    ],
+    "substrate_eps_r": [
+      2.0005078423202325,
+      4.9998892146933525
+    ],
+    "solder_resist_eps_r": [
+      2.0001778219518753,
+      4.999949941103036
+    ]
+  }
+}

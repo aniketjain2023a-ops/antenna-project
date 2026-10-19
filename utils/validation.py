@@ -65,11 +65,15 @@ def validate_geometry(
             result.errors.append(f"Parameter '{name}' must be a finite number (got {value!r}).")
             continue
         value = float(value)
-        if name.endswith("_mm") and not (lo_sane <= value <= hi_sane):
+        lo_name = config.KNOWN_COLUMNS.get(name, {}).get("min_valid", lo_sane)
+        if name.endswith("_mm") and not (lo_name <= value <= hi_sane):
             result.errors.append(
                 f"Parameter '{name}'={value} mm is outside the physical sanity range "
-                f"[{lo_sane}, {hi_sane}] mm."
+                f"[{lo_name}, {hi_sane}] mm."
             )
+            continue
+        if not name.endswith("_mm") and value < 0 and name in config.KNOWN_COLUMNS:
+            result.errors.append(f"Parameter '{name}'={value} must not be negative.")
             continue
         if train_ranges and name in train_ranges:
             t_lo, t_hi = train_ranges[name]
@@ -104,7 +108,7 @@ def validate_bounds(
         if lo >= hi:
             result.errors.append(f"Lower bound of '{name}' ({lo}) must be < upper bound ({hi}).")
             continue
-        if name.endswith("_mm") and (lo < lo_sane or hi > hi_sane):
+        if name.endswith("_mm") and (lo < config.KNOWN_COLUMNS.get(name, {}).get("min_valid", lo_sane) or hi > hi_sane):
             result.errors.append(f"Bounds of '{name}' violate physical sanity limits [{lo_sane}, {hi_sane}] mm.")
         if train_ranges and name in train_ranges:
             t_lo, t_hi = train_ranges[name]
