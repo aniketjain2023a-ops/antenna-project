@@ -13,7 +13,7 @@ verified** while writing. Do not cite anything from Part B until you have found
 and read the paper yourself.
 
 No reference here is used to support a numerical claim about this project's
-results. All results come from this software running on synthetic data.
+results. All results come from this software (METU-SIMPL HFSS data and the labelled synthetic set).
 
 ---
 
